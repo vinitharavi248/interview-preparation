@@ -1,0 +1,169 @@
+import java.io.*;
+import java.util.*;
+
+class Patient implements Serializable {
+    int id;
+    String name;
+    int age;
+    String disease;
+
+    Patient(int id, String name, int age, String disease) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.disease = disease;
+    }
+
+    void display() {
+        System.out.println("\nID: " + id);
+        System.out.println("Name: " + name);
+        System.out.println("Age: " + age);
+        System.out.println("Disease: " + disease);
+        System.out.println("------------------------");
+    }
+}
+
+public class HospitalManagementSystem {
+    static ArrayList<Patient> patients = new ArrayList<>();
+    static final String FILE_NAME = "patients.dat";
+
+   
+    static void loadFromFile() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE_NAME))) {
+            patients = (ArrayList<Patient>) ois.readObject();
+        } catch (Exception e) {
+            patients = new ArrayList<>();
+        }
+    }
+
+    static void saveToFile() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
+            oos.writeObject(patients);
+        } catch (Exception e) {
+            System.out.println("Error saving data.");
+        }
+    }
+
+    static void addPatient(Scanner sc) {
+        System.out.print("Enter ID: ");
+        int id = sc.nextInt();
+        sc.nextLine();
+
+        System.out.print("Enter Name: ");
+        String name = sc.nextLine();
+
+        System.out.print("Enter Age: ");
+        int age = sc.nextInt();
+        sc.nextLine();
+
+        System.out.print("Enter Disease: ");
+        String disease = sc.nextLine();
+
+        patients.add(new Patient(id, name, age, disease));
+        saveToFile();
+        System.out.println("Patient added successfully!");
+    }
+
+    static void viewPatients() {
+        if (patients.isEmpty()) {
+            System.out.println("No patients found.");
+            return;
+        }
+
+        for (Patient p : patients) {
+            p.display();
+        }
+    }
+
+    static void searchPatient(Scanner sc) {
+        System.out.print("Enter ID: ");
+        int id = sc.nextInt();
+
+        for (Patient p : patients) {
+            if (p.id == id) {
+                p.display();
+                return;
+            }
+        }
+
+        System.out.println("Patient not found.");
+    }
+
+    static void updatePatient(Scanner sc) {
+        System.out.print("Enter ID to update: ");
+        int id = sc.nextInt();
+        sc.nextLine();
+
+        for (Patient p : patients) {
+            if (p.id == id) {
+                System.out.print("Enter new name: ");
+                p.name = sc.nextLine();
+
+                System.out.print("Enter new age: ");
+                p.age = sc.nextInt();
+                sc.nextLine();
+
+                System.out.print("Enter new disease: ");
+                p.disease = sc.nextLine();
+
+                saveToFile();
+                System.out.println("Updated successfully!");
+                return;
+            }
+        }
+
+        System.out.println("Patient not found.");
+    }
+
+    static void deletePatient(Scanner sc) {
+        System.out.print("Enter ID to delete: ");
+        int id = sc.nextInt();
+
+        Iterator<Patient> it = patients.iterator();
+
+        while (it.hasNext()) {
+            Patient p = it.next();
+            if (p.id == id) {
+                it.remove();
+                saveToFile();
+                System.out.println("Deleted successfully!");
+                return;
+            }
+        }
+
+        System.out.println("Patient not found.");
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        loadFromFile();
+
+        int choice;
+
+        do {
+            System.out.println("\n--- Hospital Management System ---");
+            System.out.println("1. Add Patient");
+            System.out.println("2. View Patients");
+            System.out.println("3. Search Patient");
+            System.out.println("4. Update Patient");
+            System.out.println("5. Delete Patient");
+            System.out.println("6. Exit");
+            System.out.print("Enter choice: ");
+
+            choice = sc.nextInt();
+
+            switch (choice) {
+                case 1: addPatient(sc); break;
+                case 2: viewPatients(); break;
+                case 3: searchPatient(sc); break;
+                case 4: updatePatient(sc); break;
+                case 5: deletePatient(sc); break;
+                case 6: System.out.println("Exiting..."); break;
+                default: System.out.println("Invalid choice!");
+            }
+
+        } while (choice != 6);
+
+        sc.close();
+    }
+}
